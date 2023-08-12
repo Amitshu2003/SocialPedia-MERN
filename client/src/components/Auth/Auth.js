@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { signup, signin } from '../../actions/auth'
 
+
 const initialState = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' };
 
 const Auth = () => {
@@ -59,7 +60,7 @@ const Auth = () => {
     }
 
     return (
-        <GoogleOAuthProvider clientId="91043597610-ht5outkjh6fdfgpta090nhueq65jtfgo.apps.googleusercontent.com">
+        <GoogleOAuthProvider clientId={process.env.REACT_APP_CLIENT_ID}>
 
             <Container component="main" maxWidth="xs">
                 <Paper className={classes.paper} elevation={3}>
