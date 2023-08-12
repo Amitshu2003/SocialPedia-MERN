@@ -1,6 +1,9 @@
-# SocialPedia
+# SocialPedia | Connect & Share Hub 
 
 Welcome to SocialPedia, a powerful social media platform that allows users to connect, share, and engage in various ways. Below, you'll find a comprehensive guide on how to use SocialPedia effectively.
+
+## Live URL
+[Click here to access the SocialPedia website](https://socialpedia-mern.netlify.app/posts)
 
 ## Features
 
