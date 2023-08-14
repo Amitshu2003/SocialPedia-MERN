@@ -4,10 +4,9 @@ export const getPosts = async (req, res) => {
     const { page } = req.query
     try {
 
-        const LIMIT = 2;
+        const LIMIT = 2;    
         const startIndex = (Number(page) - 1) * LIMIT // get the starting index of every page
         const total = await PostMessage.countDocuments({})
-
 
         const posts = await PostMessage.find().sort({ _id: -1 }).limit(LIMIT).skip(startIndex)
 
@@ -94,7 +93,6 @@ export const likePost = async (req, res) => {
             post.likes = post.likes.filter((id) => id !== String(req.userId))
         }
 
-
         const updatedPost = await PostMessage.findByIdAndUpdate(id, post, { new: true })
 
         res.json(updatedPost)
@@ -111,7 +109,7 @@ export const commentPost = async (req, res) => {
         const post = await PostMessage.findById(id)
         post.comments.push(value)
 
-        const updatedPost = await PostMessage.findByIdAndUpdate(id,post,{new:true})
+        const updatedPost = await PostMessage.findByIdAndUpdate(id, post, { new: true })
 
         res.status(200).send(updatedPost)
 

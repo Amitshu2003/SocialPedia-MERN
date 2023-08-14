@@ -1,41 +1,44 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import useStyles from './styles';
 import { TextField, Button, Typography, Paper } from '@material-ui/core';
 import FileBase from 'react-file-base64'
-import { useDispatch, useSelector } from 'react-redux'
-import { createPost, updatePost } from '../../actions/posts';
 import { useNavigate } from 'react-router-dom';
+import myContext from '../../Context/MyContext';
 
 
 function Form({ currentId, setCurrentId }) {
+  const { createPost, updatePost, posts } = useContext(myContext)
 
   const classes = useStyles()
-  const [postData, setPostData] = useState({title: '', message: '', tags: '', selectedFile: '' })
-  const dispatch = useDispatch()
-  const post = useSelector((state) => currentId ? state.posts.posts.find((p) => p._id === currentId) : null)
+  const [postData, setPostData] = useState({ title: '', message: '', tags: '', selectedFile: '' })
+  
+  const post = currentId ? posts.find((p) => p._id === currentId) : null
+
   const user = JSON.parse(localStorage.getItem('profile'))
   const navigate = useNavigate()
 
-  useEffect(()=>{
-    if(post) setPostData(post)
-  },[post])
+  useEffect(() => {
+    if (post) setPostData(post)
+  }, [post])
 
   const handleSubmit = (e) => {
     e.preventDefault()
 
     if (currentId) {
-      dispatch(updatePost(currentId, {...postData, name : user?.result?.name}))
+      const data = {...postData, name: user?.result?.name }
+      updatePost(currentId, data)
     }
     else {
-      dispatch(createPost({...postData, name : user?.result?.name}))
+      const data = {...postData, name: user?.result?.name }   
+      createPost(data)
       navigate("/")
-    } 
+    }
     clear()
   }
 
   const clear = () => {
     setCurrentId(null)
-    setPostData({title: '', message: '', tags: '', selectedFile: '' })
+    setPostData({ title: '', message: '', tags: '', selectedFile: '' })
   }
 
   if (!user?.result?.name) {
@@ -49,7 +52,7 @@ function Form({ currentId, setCurrentId }) {
   }
 
   return (
-    <Paper elevation={6}  className={classes.paper}>
+    <Paper elevation={6} className={classes.paper}>
       <form autoComplete='off' noValidate className={`${classes.root} ${classes.form}`} onSubmit={handleSubmit}>
         <Typography variant='h6'>{currentId ? 'Editing' : 'Creating'} a Post</Typography>
 

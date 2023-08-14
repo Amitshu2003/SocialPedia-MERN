@@ -1,26 +1,24 @@
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { Paper, Typography, CircularProgress, Divider } from '@material-ui/core';
-import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 import { useParams, useNavigate } from 'react-router-dom';
 import useStyles from './styles';
-import { getPost, getPostBySearch } from "../../actions/posts"
 import CommentSection from './CommentSection';
+import myContext from '../../Context/MyContext';
 
 function PostDetails() {
-  const { post, posts, isLoading } = useSelector((state) => state.posts)
-  const dispatch = useDispatch();
+  const { post, posts, isLoading , getPost, getPostBySearch} = useContext(myContext)
   const classes = useStyles();
   const navigate = useNavigate()
   const { id } = useParams();
 
   useEffect(() => {
-    dispatch(getPost(id))
+    getPost(id) 
   }, [id])
 
   useEffect(() => {
     if (post) {
-      dispatch(getPostBySearch({ search: 'none', tags: post?.tags.join(",") }))
+      getPostBySearch({ search: 'none', tags: post?.tags.join(",") })
     }
   }, [post])
 
@@ -45,7 +43,7 @@ function PostDetails() {
       <div className={classes.card}>
         <div className={classes.section}>
           <Typography variant="h3" component="h2">{post.title}</Typography>
-          <Typography gutterBottom variant="h6" color="textSecondary" component="h2">{post.tags.map((tag) => `#${tag} `)}</Typography>
+          <Typography gutterBottom variant="h6" color="textSecondary" component="h2">{post?.tags.map((tag) => `#${tag} `)}</Typography>
           <Typography gutterBottom variant="body1" component="p">{post.message}</Typography>
           <Typography variant="h6">Created by: {post.name}</Typography>
           <Typography variant="body1">{moment(post.createdAt).fromNow()}</Typography>

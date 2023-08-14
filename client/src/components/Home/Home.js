@@ -1,32 +1,27 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Container, Grow, Grid, Paper, AppBar, TextField, Button } from "@material-ui/core"
 import Posts from "../Posts/Posts"
 import Form from "../Form/Form"
-import { useDispatch } from 'react-redux'
-import { getPosts, getPostBySearch } from '../../actions/posts'
 import Paginate from '../Pagination'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import useStyles from "./styles"
 import ChipInput from 'material-ui-chip-input'
+import myContext from '../../Context/MyContext'
 
-function useQuery() {
-    console.log(useLocation().search);
-    return new URLSearchParams(useLocation().search)
-}
 
 function Home() {
-    const dispatch = useDispatch()
     const [currentId, setCurrentId] = useState(null)
-    const query = useQuery()
     const navigate = useNavigate()
-    const page = query.get('page')
-    const searchQuery = query.get('searchQuery')
+    const [searchParams, setSearchParams] = useSearchParams()
+    const page = searchParams.get('page')
+    
     const classes = useStyles()
     const [search, setSearch] = useState("")
     const [tags, setTags] = useState([])
+    const { getPosts, getPostBySearch } = useContext(myContext)
 
     useEffect(() => {
-        dispatch(getPosts())
+        getPosts()
     }, [])
 
     const handleKeyDown = (e) => {
@@ -42,8 +37,7 @@ function Home() {
 
     const searchPost = () => {
         if (search.trim() || tags) {
-            //dispatch fetch search post 
-            dispatch(getPostBySearch({ search, tags: tags.join(",") }))
+            getPostBySearch({ search, tags: tags.join(",") })
             navigate(`/posts/search?searchQuery=${search || 'none'}&tags=${tags.join(",")}`)
         } else {
             navigate("/")
@@ -51,7 +45,7 @@ function Home() {
     }
 
     return (
-        <Grow in style={{padding:0}}>
+        <Grow in style={{ padding: 0 }}>
             <Container maxWidth='xl'>
                 <Grid container justifyContent="space-between" alignItems="stretch" spacing={3} className={classes.gridContainer}>
 
@@ -76,12 +70,11 @@ function Home() {
                     </Grid>
 
                     <Grid item xs={12} sm={6} md={6}>
-                        <Posts  setCurrentId={setCurrentId} />
+                        <Posts setCurrentId={setCurrentId} />
                     </Grid>
 
                     <Grid item xs={12} sm={3} md={3}>
                         <Form currentId={currentId} setCurrentId={setCurrentId} />
-
                     </Grid>
                 </Grid>
             </Container>

@@ -1,13 +1,12 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { Avatar, Button, Paper, Grid, Typography, Container } from '@material-ui/core';
 import useStyles from './styles';
 import Input from './Input';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import jwtDecode from "jwt-decode"
-import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { signup, signin } from '../../actions/auth'
+import myContext from '../../Context/MyContext';
 
 
 const initialState = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' };
@@ -16,18 +15,16 @@ const Auth = () => {
     const classes = useStyles()
     const [isSignup, setIsSignup] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
-    const dispatch = useDispatch()
     const navigate = useNavigate()
     const [formData, setFormData] = useState(initialState)
-
+    const { signin, signup } = useContext(myContext)
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        console.log(formData);
         if (isSignup) {
-            dispatch(signup(formData, navigate))
+            signup(formData, navigate)
         } else {
-            dispatch(signin(formData, navigate))
+            signin(formData, navigate)
         }
     }
 
@@ -47,7 +44,8 @@ const Auth = () => {
         const token = response?.credential;
         const result = jwtDecode(response.credential)
         try {
-            dispatch({ type: 'AUTH', data: { result, token } })
+            const data = { result, token }
+            localStorage.setItem('profile', JSON.stringify(data))
             navigate("/")
         } catch (error) {
             console.log(error);
@@ -86,14 +84,12 @@ const Auth = () => {
                             {isSignup ? 'Sign Up' : 'Sign In'}
                         </Button>
 
-                       <GoogleLogin onSuccess={googleSuccess} onError={googleFailure} />
 
-
-
-                        <Grid container justifyContent="flex-end">
-                            <Grid item>
-                                <Button onClick={switchMode}>
-                                    {isSignup ? 'Already have an account? Sign in' : "Don't have an account? Sign Up"}
+                        <Grid container justifyContent="flex-start">
+                            <GoogleLogin onSuccess={googleSuccess} onError={googleFailure} />
+                            <Grid item  style={{"marginLeft":"auto"}}>
+                                <Button style={{ "padding":"7px 25px"}} onClick={switchMode} variant="outlined" color="primary">
+                                    {isSignup ? ' Sign in' : "Sign Up"}
                                 </Button>
                             </Grid>
                         </Grid>
