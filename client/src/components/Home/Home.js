@@ -1,85 +1,72 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { Container, Grow, Grid, Paper, AppBar, TextField, Button } from "@material-ui/core"
+import { Grow, Grid, Paper, Typography, Button } from "@material-ui/core"
+import CloseIcon from '@material-ui/icons/Close'
 import Posts from "../Posts/Posts"
 import Form from "../Form/Form"
 import Paginate from '../Pagination'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import useStyles from "./styles"
-import ChipInput from 'material-ui-chip-input'
 import myContext from '../../Context/MyContext'
 
 
+// What's shown is driven entirely by the URL: /posts?page=N or /posts/search?searchQuery=...&page=N
 function Home() {
     const [currentId, setCurrentId] = useState(null)
     const navigate = useNavigate()
-    const [searchParams, setSearchParams] = useSearchParams()
-    const page = searchParams.get('page')
-    
+    const location = useLocation()
+    const [searchParams] = useSearchParams()
+    const page = Number(searchParams.get('page')) || 1
+    const searchQuery = (searchParams.get('searchQuery') || '').trim()
+    const isSearch = location.pathname === '/posts/search' && Boolean(searchQuery)
+
     const classes = useStyles()
-    const [search, setSearch] = useState("")
-    const [tags, setTags] = useState([])
-    const { getPosts, getPostBySearch } = useContext(myContext)
+    const { getPosts, getPostBySearch, numberOfPages, isLoading } = useContext(myContext)
 
     useEffect(() => {
-        getPosts()
-    }, [])
-
-    const handleKeyDown = (e) => {
-        if (e.keyCode === 13) searchPost()
-    }
-
-    const handleAdd = (tag) => {
-        setTags([...tags, tag])
-    }
-    const handleDelete = (tagtoDelete) => {
-        setTags(tags.filter((tag) => tag !== tagtoDelete))
-    }
-
-    const searchPost = () => {
-        if (search.trim() || tags) {
-            getPostBySearch({ search, tags: tags.join(",") })
-            navigate(`/posts/search?searchQuery=${search || 'none'}&tags=${tags.join(",")}`)
+        if (isSearch) {
+            getPostBySearch({ search: searchQuery, page })
         } else {
-            navigate("/")
+            getPosts(page)
         }
-    }
+    }, [isSearch, searchQuery, page])
 
     return (
-        <Grow in style={{ padding: 0 }}>
-            <Container maxWidth='xl'>
-                <Grid container justifyContent="space-between" alignItems="stretch" spacing={3} className={classes.gridContainer}>
+        <Grow in>
+            <Grid container justifyContent="space-between" alignItems="flex-start" spacing={3}>
 
-                    <Grid item xs={12} sm={3} md={3}>
-                        <AppBar className={classes.appBarSearch} position="static" color="inherit">
-                            <TextField name="search" variant="outlined" label="Search By Title" fullWidth value={search} onChange={(e) => { setSearch(e.target.value) }}
-                                onKeyDown={handleKeyDown} />
-                            <ChipInput
-                                style={{ margin: '10px 0' }}
-                                value={tags}
-                                onAdd={handleAdd}
-                                onDelete={handleDelete}
-                                label="Search By Tags"
-                                variant="outlined"
-                            />
-                            <Button onClick={searchPost} className={classes.searchButton} variant="contained" color="primary">Search</Button>
-                        </AppBar>
+                <Grid item xs={12} md={9} className={classes.postsColumn}>
+                    <div className={classes.feedHeader}>
+                        <div>
+                            <Typography variant="h5">
+                                {isSearch ? <>Results for “{searchQuery}”</> : 'Latest posts'}
+                            </Typography>
+                            {!isLoading && numberOfPages > 1 && (
+                                <Typography variant="body2" color="textSecondary">Page {page} of {numberOfPages}</Typography>
+                            )}
+                        </div>
+                        {isSearch && (
+                            <Button size="small" startIcon={<CloseIcon />} onClick={() => navigate('/posts')} className={classes.clearSearch}>
+                                Clear search
+                            </Button>
+                        )}
+                    </div>
 
-                        <Paper elevation={6} className={classes.pagination}>
-                            <Paginate page={page} />
+                    <Posts setCurrentId={setCurrentId} />
+
+                    {!isLoading && numberOfPages > 1 && (
+                        <Paper elevation={3} className={classes.pagination}>
+                            <Paginate page={page} count={numberOfPages} />
                         </Paper>
-                    </Grid>
-
-                    <Grid item xs={12} sm={6} md={6}>
-                        <Posts setCurrentId={setCurrentId} />
-                    </Grid>
-
-                    <Grid item xs={12} sm={3} md={3}>
-                        <Form currentId={currentId} setCurrentId={setCurrentId} />
-                    </Grid>
+                    )}
                 </Grid>
-            </Container>
-        </Grow>
 
+                <Grid item xs={12} md={3} className={classes.formColumn}>
+                    <div className={classes.sticky}>
+                        <Form currentId={currentId} setCurrentId={setCurrentId} />
+                    </div>
+                </Grid>
+            </Grid>
+        </Grow>
     )
 }
 

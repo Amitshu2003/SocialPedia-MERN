@@ -1,27 +1,31 @@
-import React, { useContext, useEffect } from 'react'
+import React from 'react'
 import { Pagination, PaginationItem } from "@material-ui/lab"
 import useStyles from './styles'
-import { Link } from 'react-router-dom'
-import myContext from '../Context/MyContext'
+import { Link, useLocation } from 'react-router-dom'
 
-function Paginate({ page }) {
+// Renders page links for the current URL, keeping any search query and only swapping `page`.
+function Paginate({ page, count }) {
     const classes = useStyles()
-    const { numberOfPages, getPosts } = useContext(myContext)
+    const location = useLocation()
 
-    useEffect(() => {
-        if (page) {
-            getPosts(page)
-        }
-    }, [page])
+    const linkFor = (pageNumber) => {
+        const params = new URLSearchParams(location.search)
+        params.set('page', pageNumber)
+        return `${location.pathname}?${params.toString()}`
+    }
+
+    if (count <= 1) return null
+
     return (
         <Pagination
             classes={{ ul: classes.ul }}
-            count={numberOfPages}
-            page={Number(page) || 1}
-            variant="outlined"
+            count={count}
+            page={page}
             color="primary"
+            shape="rounded"
+            size="large"
             renderItem={(item) => (
-                <PaginationItem {...item} component={Link} to={`/posts?page=${item.page}`} />
+                <PaginationItem {...item} component={Link} to={linkFor(item.page)} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} />
             )}
         />
     )
