@@ -2,59 +2,118 @@ import { makeStyles } from '@material-ui/core/styles';
 
 export default makeStyles((theme) => ({
   appBar: {
-    borderRadius: 5,
-    marginBottom: 20,
-    width:'100%',
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '2px 50px',
-    [theme.breakpoints.down('sm')]: {
-      flexDirection: 'column',
+    marginBottom: theme.spacing(4),
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
+    backdropFilter: 'saturate(180%) blur(12px)',
+    WebkitBackdropFilter: 'saturate(180%) blur(12px)',
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    [theme.breakpoints.down('xs')]: {
+      marginBottom: theme.spacing(2),
     },
-  },
-  heading: {
-    color: theme.palette.primary.main,
-    textDecoration: 'none',
-    fontSize: '2em',
-    fontWeight: 300,
-  },
-  image: {
-    marginLeft: '10px',
-    marginTop: '5px',
   },
   toolbar: {
     display: 'flex',
-    justifyContent: 'flex-end',
-    [theme.breakpoints.down('sm')]: {
-      width: 'auto',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    minHeight: 68,
+    [theme.breakpoints.down('xs')]: {
+      flexWrap: 'wrap',
+      paddingTop: theme.spacing(1),
     },
   },
-  profile: {
+  searchForm: {
+    flex: 1,
+    maxWidth: 560,
+    margin: theme.spacing(0, 3),
     display: 'flex',
-    justifyContent: 'flex-end',
     alignItems: 'center',
-    [theme.breakpoints.down('sm')]: {
-      width: 'auto',
-      marginTop: 20,
-      justifyContent: 'center',
+    gap: '6px',
+    padding: '4px 4px 4px 14px',
+    borderRadius: 999,
+    backgroundColor: '#f1f2f9',
+    border: '1px solid transparent',
+    transition: 'border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease',
+    '&:focus-within': {
+      backgroundColor: '#fff',
+      borderColor: theme.palette.primary.light,
+      boxShadow: '0 0 0 4px rgba(108, 99, 255, 0.12)',
+    },
+    // phones: search gets its own full-width row under the logo and profile
+    [theme.breakpoints.down('xs')]: {
+      order: 3,
+      flexBasis: '100%',
+      maxWidth: 'none',
+      margin: theme.spacing(1, 0, 1.5),
     },
   },
-  logout: {
-    marginLeft: '20px'
+  searchIcon: {
+    color: theme.palette.text.secondary,
   },
-  userName: {
-    display: 'flex',
-    marginLeft: '10px',
-    alignItems: 'center',
-    textAlign: 'center',
+  searchInput: {
+    flex: 1,
+    fontSize: '0.95rem',
+  },
+  searchButton: {
+    borderRadius: 999,
+    padding: '6px 16px',
+    boxShadow: 'none',
   },
   brandContainer: {
     display: 'flex',
     alignItems: 'center',
+    gap: '10px',
   },
-  logo: {
-    backgroundColor:'#125487'
+  logoImage: {
+    height: 38,
+    width: 'auto',
+  },
+  profile: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+  userChip: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    padding: '4px 14px 4px 4px',
+    borderRadius: 999,
+    backgroundColor: 'rgba(108, 99, 255, 0.08)',
+  },
+  avatar: {
+    width: 34,
+    height: 34,
+    fontSize: '0.95rem',
+    fontWeight: 700,
+    background: 'linear-gradient(135deg, #6c63ff 0%, #f43f73 100%)',
+  },
+  userName: {
+    fontWeight: 600,
+    maxWidth: 180,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    [theme.breakpoints.down('xs')]: {
+      maxWidth: 110,
+    },
+  },
+  logout: {
+    color: theme.palette.text.secondary,
+    borderColor: theme.palette.divider,
+    '&:hover': {
+      color: theme.palette.secondary.main,
+      borderColor: theme.palette.secondary.light,
+      backgroundColor: 'rgba(244, 63, 115, 0.06)',
+    },
+    [theme.breakpoints.down('xs')]: {
+      display: 'none',
+    },
+  },
+  logoutIcon: {
+    display: 'none',
+    color: theme.palette.text.secondary,
+    [theme.breakpoints.down('xs')]: {
+      display: 'inline-flex',
+    },
   },
 }));

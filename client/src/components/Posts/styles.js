@@ -1,14 +1,20 @@
 import { makeStyles } from '@material-ui/core/styles';
 
 export default makeStyles((theme) => ({
-  mainContainer: {
-    display: 'flex',
-    alignItems: 'center',
+  skeletonCard: {
+    overflow: 'hidden',
+    height: '100%',
   },
-  smMargin: {
-    margin: theme.spacing(1),
+  skeletonBody: {
+    padding: theme.spacing(2),
   },
-  actionDiv: {
+  emptyState: {
+    padding: theme.spacing(6, 3),
     textAlign: 'center',
+  },
+  emptyIcon: {
+    fontSize: 56,
+    color: theme.palette.primary.light,
+    marginBottom: theme.spacing(1),
   },
 }));
