@@ -11,8 +11,9 @@ const postSchema = mongoose.Schema({
         type: [String],
         default: [],
     },
+    // New comments are { _id, authorId, name, text, createdAt }; older ones are plain "Name : text" strings.
     comments: {
-        type: [String],
+        type: [mongoose.Schema.Types.Mixed],
         default: [],
     },
     createdAt: {
