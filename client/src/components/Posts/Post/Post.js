@@ -1,91 +1,104 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext } from 'react'
 import useStyles from './styles';
-import { Card, CardActions, CardContent, CardMedia, Button, Typography, ButtonBase } from '@material-ui/core/';
-import ThumbUpAltIcon from '@material-ui/icons/ThumbUpAlt';
-import DeleteIcon from '@material-ui/icons/Delete';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import { Card, CardActions, CardContent, CardMedia, Button, Typography, ButtonBase, Avatar, IconButton, Tooltip } from '@material-ui/core/';
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
+import DeleteOutlineIcon from '@material-ui/icons/DeleteOutline';
+import EditOutlinedIcon from '@material-ui/icons/EditOutlined';
+import ChatBubbleOutlineIcon from '@material-ui/icons/ChatBubbleOutline';
 import moment from 'moment'
-import ThumbUpAltOutlined from '@material-ui/icons/ThumbUpAltOutlined';
 import { useNavigate } from 'react-router-dom';
 import myContext from '../../../Context/MyContext';
+import useLike from '../../../hooks/useLike';
+import { getProfile, getUserId } from '../../../utils/user';
 
 function Post({ post, setCurrentId }) {
-  const { likePost, deletePost } = useContext(myContext)
+  const { deletePost } = useContext(myContext)
   const classes = useStyles();
   const navigate = useNavigate()
-  const [likes, setLikes] = useState(post?.likes)
+  const { likes, hasLiked, toggleLike, canLike } = useLike(post)
 
-  const user = JSON.parse(localStorage.getItem('profile'))
+  const userId = getUserId(getProfile())
+  const isCreator = Boolean(userId) && userId === post?.creator
 
   const openPost = () => {
     navigate(`/posts/${post._id}`)
   }
 
-  const userId = user?.result.googleId || user?.result?._id;
-  const hasLikedPost = likes.find((like) => like === userId);
-
-  const [alreadyLiked, setAlreadyLiked] = useState(hasLikedPost)
-
-  const handleLike = async () => {
-    likePost(post._id)
-    setAlreadyLiked(!alreadyLiked)
-    if (hasLikedPost) {
-      setLikes(likes.filter((id) => id !== userId));
-    } else {
-      setLikes([...likes, userId]);
-    }
-  };
-
-
   return (
-    <Card className={classes.card} raised elevation={6}>
+    <Card className={classes.card} elevation={3}>
       <ButtonBase
-        component="span"
-        name="test"
+        component="div"
         className={classes.cardAction}
         onClick={openPost}
       >
-
-        <CardMedia className={classes.media} image={post.selectedFile} title={post.title} src='No Image' />
-        <div className={classes.overlay}>
-          <Typography variant="h6">{post.name}</Typography>
-          <Typography variant="body2">{moment(post.createdAt).fromNow()}</Typography>
-        </div>
-        {(user?.result?.googleId === post?.creator || user?.result?._id === post?.creator) && (
-          <div className={classes.overlay2} name="edit">
-            <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                setCurrentId(post._id);
-              }}
-              style={{ color: 'white' }}
-              size="small"
-            >
-              <MoreHorizIcon fontSize="medium" />
-            </Button>
+        <div className={classes.mediaWrapper}>
+          {post.selectedFile
+            ? <CardMedia className={classes.media} image={post.selectedFile} title={post.title} />
+            : <div className={`${classes.media} ${classes.mediaFallback}`} />}
+          <div className={classes.mediaShade} />
+          <div className={classes.overlay}>
+            <Avatar className={classes.authorAvatar}>{post.name?.charAt(0)}</Avatar>
+            <div>
+              <Typography variant="subtitle2" className={classes.authorName}>{post.name}</Typography>
+              <Typography variant="caption" className={classes.timestamp}>{moment(post.createdAt).fromNow()}</Typography>
+            </div>
           </div>
-        )}
-
-        <div className={classes.details}>
-          <Typography variant="body2" color="textSecondary" component="h2">{post.tags.map((tag) => `#${tag} `)}</Typography>
+          {isCreator && (
+            <Tooltip title="Edit post">
+              <IconButton
+                className={classes.editButton}
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCurrentId(post._id);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              >
+                <EditOutlinedIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
         </div>
-        <Typography className={classes.title} gutterBottom variant="h5" component="h2">{post.title}</Typography>
-        <CardContent>
-          <Typography variant="body2" color="textSecondary" component="p">{post.message}</Typography>
+
+        <CardContent className={classes.content}>
+          {post.tags?.filter(Boolean).length > 0 && (
+            <div className={classes.tags}>
+              {post.tags.filter(Boolean).map((tag) => (
+                <span key={tag} className={classes.tag}>#{tag.trim()}</span>
+              ))}
+            </div>
+          )}
+          <Typography className={classes.title} variant="h6" component="h2">{post.title}</Typography>
+          <Typography className={classes.message} variant="body2" color="textSecondary" component="p">{post.message}</Typography>
         </CardContent>
       </ButtonBase>
 
       <CardActions className={classes.cardActions}>
-        <Button size="small" color="primary" disabled={!user?.result} onClick={handleLike}>
-          {alreadyLiked ? <ThumbUpAltIcon fontSize="small" /> : <ThumbUpAltOutlined fontSize="small" />} &nbsp;{likes.length}  </Button>
+        <div className={classes.stats}>
+          <Button
+            size="small"
+            disabled={!canLike}
+            onClick={toggleLike}
+            className={hasLiked ? classes.liked : classes.likeButton}
+            startIcon={hasLiked ? <FavoriteIcon fontSize="small" /> : <FavoriteBorderIcon fontSize="small" />}
+          >
+            {likes.length}
+          </Button>
+          <Button size="small" className={classes.likeButton} onClick={openPost} startIcon={<ChatBubbleOutlineIcon fontSize="small" />}>
+            {post.comments?.length || 0}
+          </Button>
+        </div>
 
-        {
-          (user?.result?.googleId === post?.creator || user?.result?._id === post?.creator)
-          &&
-          <Button size="small" color="secondary" onClick={() => { deletePost(post._id) }}><DeleteIcon fontSize="small" /> Delete</Button>
-        }
+        {isCreator && (
+          <Tooltip title="Delete post">
+            <IconButton size="small" className={classes.deleteButton} onClick={() => { deletePost(post._id) }}>
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
       </CardActions>
-    </Card >
+    </Card>
   )
 }
 
