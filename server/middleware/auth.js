@@ -17,11 +17,13 @@ const auth = async (req, res, next) => {
             decodedData = await jwt.decode(token)
             console.log("google decodedData", decodedData);
             req.userId = decodedData?.sub
+            req.userName = decodedData?.name
         }
 
         next()
     } catch (error) {
         console.log(error);
+        res.status(401).json({ message: "Unauthenticated" })
     }
 }
 
